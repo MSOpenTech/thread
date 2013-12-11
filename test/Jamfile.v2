@@ -95,8 +95,10 @@ project
         <toolset>intel:<cxxflags>-wd193,304,383,444
         <toolset>intel:<cxxflags>-wd593,981
         <toolset>intel:<cxxflags>-wd1418
-	<toolset>intel:<cxxflags>-wd2415
-
+        <toolset>intel:<cxxflags>-wd2415
+    
+    : default-build  
+        [ supported-windows-api ]  
 
     ;
 
@@ -431,7 +433,7 @@ rule thread-compile ( sources : reqs * : name )
           [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_upgrade_lock_pass.cpp : unique_lock__cons__move_ctor_upgrade_lock_p ]
           [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_upgrade_lock_try_pass.cpp : unique_lock__cons__move_ctor_upgrade_lock_try_p ]
           [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_upgrade_lock_for_pass.cpp : unique_lock__cons__move_ctor_upgrade_lock_for_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_upgrade_lock_until_pass.cpp : unique_lock__cons__move_ctor_upgrade_lock_until_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_upgrade_lock_until_pass.cpp : un_l__cons__m_ctor_upgrade_lock_until_p ]
           [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/mutex_pass.cpp : unique_lock__cons__mutex_p ]
           [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/time_point_pass.cpp : unique_lock__cons__time_point_p ]
           [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/try_to_lock_pass.cpp : unique_lock__cons__try_to_lock_p ]
@@ -736,7 +738,7 @@ rule thread-compile ( sources : reqs * : name )
 
           [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_try_pass.cpp : upgrade_lock__cons__move_ctor_shared_lock_try_p ]
           [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_for_pass.cpp : upgrade_lock__cons__move_ctor_shared_lock_for_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_until_pass.cpp : upgrade_lock__cons__move_ctor_shared_lock_until_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_until_pass.cpp : up_l__cons__move_ctor_shared_lock_until_p ]
     ;
 
 

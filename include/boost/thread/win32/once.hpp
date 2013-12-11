@@ -6,6 +6,9 @@
 //  (C) Copyright 2005-7 Anthony Williams
 //  (C) Copyright 2005 John Maddock
 //  (C) Copyright 2011-2013 Vicente J. Botet Escriba
+//  Copyright Steve Gates 2013.
+//  Copyright George Mileka 2013.
+//  Portions Copyright (c) Microsoft Open Technologies, Inc.
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -152,14 +155,27 @@ namespace boost
             {
                 name_once_mutex(mutex_name,flag_address);
             }
-#ifdef BOOST_NO_ANSI_APIS
-            return ::boost::detail::win32::CreateEventW(
-#else
+#if !defined(BOOST_NO_ANSI_APIS)
             return ::boost::detail::win32::CreateEventA(
-#endif
-                0,::boost::detail::win32::manual_reset_event,
+                0,
+                ::boost::detail::win32::manual_reset_event,
                 ::boost::detail::win32::event_initially_reset,
                 mutex_name);
+#else
+#if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_VISTA
+            return ::boost::detail::win32::CreateEventW(
+                0,
+                ::boost::detail::win32::manual_reset_event,
+                ::boost::detail::win32::event_initially_reset,
+                mutex_name);
+#else
+            return ::boost::detail::win32::CreateEventExW(
+                0,
+                mutex_name,
+                ::boost::detail::win32::create_event_manual_reset,
+                ::boost::detail::win32::event_all_access);
+#endif
+#endif
         }
 
         struct once_context {
@@ -267,8 +283,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite, 0));
+# endif
         }
     }
 //#endif
@@ -311,8 +332,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
         }
     }
     template<typename Function, class A, class ...ArgTypes>
@@ -358,8 +384,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
         }
     }
 #else
@@ -403,8 +434,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif     
         }
     }
     template<typename Function, typename T1>
@@ -446,8 +482,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
         }
     }
     template<typename Function, typename T1, typename T2>
@@ -489,8 +530,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
         }
     }
     template<typename Function, typename T1, typename T2, typename T3>
@@ -532,8 +578,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif 
         }
     }
 #elif defined BOOST_NO_CXX11_RVALUE_REFERENCES
@@ -577,8 +628,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif 
         }
     }
     template<typename Function, typename T1>
@@ -620,8 +676,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif 
         }
     }
     template<typename Function, typename T1, typename T2>
@@ -663,8 +724,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif 
         }
     }
     template<typename Function, typename T1, typename T2, typename T3>
@@ -706,8 +772,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif 
         }
     }
 #endif
@@ -751,8 +822,13 @@ namespace boost
                         continue;
                     }
                 }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
                 BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                                  ctx.event_handle,::boost::detail::win32::infinite));
+# else
+                BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                                 ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
             }
         }
         template<typename T1>
@@ -796,8 +872,13 @@ namespace boost
                         continue;
                     }
                 }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
                 BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                                  ctx.event_handle,::boost::detail::win32::infinite));
+# else
+                BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                                 ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
             }
         }
         template<typename Function, typename T1, typename T2>
@@ -842,8 +923,13 @@ namespace boost
                         continue;
                     }
                 }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
                 BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                                  ctx.event_handle,::boost::detail::win32::infinite));
+# else
+                BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                                 ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
             }
         }
         template<typename Function, typename T1, typename T2, typename T3>
@@ -889,8 +975,13 @@ namespace boost
                         continue;
                     }
                 }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
                 BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                                  ctx.event_handle,::boost::detail::win32::infinite));
+# else
+                BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                                 ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
             }
         }
 #endif
@@ -933,8 +1024,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
         }
     }
 
@@ -980,8 +1076,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
         }
     }
     template<typename Function, typename T1, typename T2>
@@ -1027,8 +1128,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
         }
     }
     template<typename Function, typename T1, typename T2, typename T3>
@@ -1076,8 +1182,13 @@ namespace boost
                     continue;
                 }
             }
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
                              ctx.event_handle,::boost::detail::win32::infinite));
+# else
+            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObjectEx(
+                             ctx.event_handle,::boost::detail::win32::infinite,0));
+# endif
         }
     }
 

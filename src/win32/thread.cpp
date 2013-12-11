@@ -1,17 +1,13 @@
-// Distributed under the Boost Software License, Version 1.0. (See
-// accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
-// (C) Copyright 2007 Anthony Williams
-// (C) Copyright 2007 David Deakins
-// (C) Copyright 2011-2013 Vicente J. Botet Escriba
+//  (C) Copyright 2007 Anthony Williams
+//  (C) Copyright 2007 David Deakins
+//  (C) Copyright 2011-2012 Vicente J. Botet Escriba
+//  Copyright Steve Gates 2013.
+//  Copyright George Mileka 2013.
+//  Portions Copyright (c) Microsoft Open Technologies, Inc.
+//  Distributed under the Boost Software License, Version 1.0. (See
+//  accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x400
-#endif
-
-#ifndef WINVER
-#define WINVER 0x400
-#endif
 //#define BOOST_THREAD_VERSION 3
 
 #include <boost/thread/thread_only.hpp>
@@ -20,7 +16,6 @@
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/detail/tss_hooks.hpp>
 #include <boost/thread/future.hpp>
-
 #include <boost/assert.hpp>
 #include <boost/cstdint.hpp>
 #if defined BOOST_THREAD_USES_DATETIME
@@ -65,27 +60,45 @@ namespace boost
         // Windows CE does not define the TLS_OUT_OF_INDEXES constant.
 #define TLS_OUT_OF_INDEXES 0xFFFFFFFF
 #endif
+#ifndef BOOST_WINAPI_FAMILY
         DWORD current_thread_tls_key=TLS_OUT_OF_INDEXES;
+#else
+        DWORD current_thread_tls_key=FLS_OUT_OF_INDEXES;
+#endif
 
         void create_current_thread_tls_key()
         {
             tss_cleanup_implemented(); // if anyone uses TSS, we need the cleanup linked in
+#ifndef BOOST_WINAPI_FAMILY
             current_thread_tls_key=TlsAlloc();
             BOOST_ASSERT(current_thread_tls_key!=TLS_OUT_OF_INDEXES);
+#else
+            current_thread_tls_key=FlsAlloc(0);
+            BOOST_ASSERT(current_thread_tls_key!=FLS_OUT_OF_INDEXES);
+#endif
         }
 
         void cleanup_tls_key()
         {
+#ifndef BOOST_WINAPI_FAMILY
             if(current_thread_tls_key!=TLS_OUT_OF_INDEXES)
             {
                 TlsFree(current_thread_tls_key);
                 current_thread_tls_key=TLS_OUT_OF_INDEXES;
             }
+#else
+            if(current_thread_tls_key!=FLS_OUT_OF_INDEXES)
+            {
+                FlsFree(current_thread_tls_key);
+                current_thread_tls_key=FLS_OUT_OF_INDEXES;
+            }
+#endif
         }
 
         void set_current_thread_data(detail::thread_data_base* new_data)
         {
             boost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
+#ifndef BOOST_WINAPI_FAMILY
             if (current_thread_tls_key!=TLS_OUT_OF_INDEXES)
             {
                 BOOST_VERIFY(TlsSetValue(current_thread_tls_key,new_data));
@@ -95,6 +108,17 @@ namespace boost
                 BOOST_VERIFY(false);
                 //boost::throw_exception(thread_resource_error());
             }
+#else
+            if (current_thread_tls_key!=FLS_OUT_OF_INDEXES)
+            {
+                BOOST_VERIFY(FlsSetValue(current_thread_tls_key,new_data));
+            }
+            else
+            {
+                BOOST_VERIFY(false);
+                //boost::throw_exception(thread_resource_error());
+            }
+#endif
         }
 
     }
@@ -102,11 +126,19 @@ namespace boost
     {
       thread_data_base* get_current_thread_data()
       {
+#ifndef BOOST_WINAPI_FAMILY
           if(current_thread_tls_key==TLS_OUT_OF_INDEXES)
           {
               return 0;
           }
           return (detail::thread_data_base*)TlsGetValue(current_thread_tls_key);
+#else
+          if(current_thread_tls_key==FLS_OUT_OF_INDEXES)
+          {
+              return 0;
+          }
+          return (detail::thread_data_base*)FlsGetValue(current_thread_tls_key);
+#endif
       }
     }
     namespace
@@ -236,6 +268,22 @@ namespace boost
 
     bool thread::start_thread_noexcept()
     {
+#ifdef BOOST_WINAPI_FAMILY
+        // All std threads start immediately so we must add a reference now, and remove if an exception occurs.
+        intrusive_ptr_add_ref(thread_info.get());
+        BOOST_TRY
+        {
+            thread_info->thread_handle = std::thread(&thread_start_function, thread_info.get());
+        }
+        BOOST_CATCH(...)
+        {
+            intrusive_ptr_release(thread_info.get());
+            return false;
+//            boost::throw_exception(thread_resource_error());
+        }
+        BOOST_CATCH_END
+        return true;
+#else
         uintptr_t const new_thread=_beginthreadex(0,0,&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
         if(!new_thread)
         {
@@ -246,8 +294,10 @@ namespace boost
         thread_info->thread_handle=(detail::win32::handle)(new_thread);
         ResumeThread(thread_info->thread_handle);
         return true;
+#endif
     }
-
+    
+#ifndef BOOST_WINAPI_FAMILY
     bool thread::start_thread_noexcept(const attributes& attr)
     {
       //uintptr_t const new_thread=_beginthreadex(attr.get_security(),attr.get_stack_size(),&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
@@ -262,6 +312,7 @@ namespace boost
       ResumeThread(thread_info->thread_handle);
       return true;
     }
+#endif
 
     thread::thread(detail::thread_data_ptr data):
         thread_info(data)
@@ -326,26 +377,45 @@ namespace boost
 
     thread::id thread::get_id() const BOOST_NOEXCEPT
     {
-    #if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
-      detail::thread_data_ptr local_thread_info=(get_thread_info)();
-      return local_thread_info?local_thread_info->id:0;
-      //return const_cast<thread*>(this)->native_handle();
-    #else
+#if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
+        detail::thread_data_ptr local_thread_info=(get_thread_info)();
+        if(!local_thread_info)
+        {
+            return 0;
+        }
+#ifdef BOOST_WINAPI_FAMILY
+        return thread::id(local_thread_info->thread_handle.get_id().hash());
+#else
+        return local_thread_info->id;
+        //return const_cast<thread*>(this)->native_handle();
+#endif
+#else
         return thread::id((get_thread_info)());
-    #endif
+#endif
     }
 
     bool thread::joinable() const BOOST_NOEXCEPT
     {
-        return (get_thread_info)() ? true : false;
+        detail::thread_data_ptr local_thread_info = (get_thread_info)();
+        if(!local_thread_info)
+        {
+            return false;
+        }
+#ifdef BOOST_WINAPI_FAMILY
+        return local_thread_info->thread_handle.joinable();
+#else
+        return true;
+#endif
     }
     bool thread::join_noexcept()
     {
-
         detail::thread_data_ptr local_thread_info=(get_thread_info)();
         if(local_thread_info)
         {
-            this_thread::interruptible_wait(local_thread_info->thread_handle,detail::timeout::sentinel());
+            this_thread::interruptible_wait(this->native_handle(),detail::timeout::sentinel());
+#ifdef BOOST_WINAPI_FAMILY
+            local_thread_info->thread_handle.join();
+#endif
             release_handle();
             return true;
         }
@@ -366,11 +436,14 @@ namespace boost
       detail::thread_data_ptr local_thread_info=(get_thread_info)();
       if(local_thread_info)
       {
-          if(!this_thread::interruptible_wait(local_thread_info->thread_handle,milli))
+          if(!this_thread::interruptible_wait(this->native_handle(),milli))
           {
             res=false;
             return true;
           }
+#ifdef BOOST_WINAPI_FAMILY
+          local_thread_info->thread_handle.join();
+#endif
           release_handle();
           res=true;
           return true;
@@ -383,6 +456,15 @@ namespace boost
 
     void thread::detach()
     {
+#ifdef BOOST_WINAPI_FAMILY
+        {
+            detail::thread_data_ptr local_thread_info=(get_thread_info)();
+            if(local_thread_info)
+            {
+                local_thread_info->thread_handle.detach();
+            }
+        }
+#endif
         release_handle();
     }
 
@@ -404,7 +486,11 @@ namespace boost
     bool thread::interruption_requested() const BOOST_NOEXCEPT
     {
         detail::thread_data_ptr local_thread_info=(get_thread_info)();
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
         return local_thread_info.get() && (detail::win32::WaitForSingleObject(local_thread_info->interruption_handle,0)==0);
+# else
+        return local_thread_info.get() && (detail::win32::WaitForSingleObjectEx(local_thread_info->interruption_handle,0,0)==0);
+# endif
     }
 
 #endif
@@ -413,12 +499,19 @@ namespace boost
     {
         //SYSTEM_INFO info={{0}};
         SYSTEM_INFO info;
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
         GetSystemInfo(&info);
+# else
+        GetNativeSystemInfo(&info);
+# endif
         return info.dwNumberOfProcessors;
     }
 
     unsigned thread::physical_concurrency() BOOST_NOEXCEPT
     {
+#ifdef BOOST_WINAPI_FAMILY
+        return hardware_concurrency();
+#else
         unsigned cores = 0;
         DWORD size = 0;
 
@@ -437,12 +530,21 @@ namespace boost
                 ++cores;
         }
         return cores;
+#endif
     }
 
     thread::native_handle_type thread::native_handle()
     {
         detail::thread_data_ptr local_thread_info=(get_thread_info)();
-        return local_thread_info?(detail::win32::handle)local_thread_info->thread_handle:detail::win32::invalid_handle_value;
+        if(!local_thread_info)
+        {
+            return detail::win32::invalid_handle_value;
+        }
+#ifdef BOOST_WINAPI_FAMILY
+        return local_thread_info->thread_handle.native_handle();
+#else
+        return (detail::win32::handle)local_thread_info->thread_handle;
+#endif
     }
 
     detail::thread_data_ptr thread::get_thread_info BOOST_PREVENT_MACRO_SUBSTITUTION () const
@@ -532,7 +634,9 @@ namespace boost
 #endif
             detail::win32::handle_manager timer_handle;
 
-#ifndef UNDER_CE
+// Adding timer support requires more work since these APIs doesn't exist any more.
+// Just rely on timeout parameter passed to WaitForMultipleObjects, in future this can be updated.
+#if !defined(UNDER_CE) && !defined(BOOST_WINAPI_FAMILY)
             unsigned const min_timer_wait_period=20;
 
             if(!target_time.is_sentinel())
@@ -574,7 +678,11 @@ namespace boost
 
                 if(handle_count)
                 {
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
                     unsigned long const notified_index=detail::win32::WaitForMultipleObjects(handle_count,handles,false,using_timer?INFINITE:time_left.milliseconds);
+# else
+                    unsigned long const notified_index=detail::win32::WaitForMultipleObjectsEx(handle_count,handles,false,using_timer?INFINITE:time_left.milliseconds, 0);
+# endif
                     if(notified_index<handle_count)
                     {
                         if(notified_index==wait_handle_index)
@@ -596,7 +704,11 @@ namespace boost
                 }
                 else
                 {
+#ifndef BOOST_WINAPI_FAMILY
                     detail::win32::Sleep(time_left.milliseconds);
+#else
+                    detail::win32::WaitForSingleObjectEx(detail::win32::GetCurrentThread(),time_left.milliseconds,FALSE);
+#endif
                 }
                 if(target_time.relative)
                 {
@@ -609,11 +721,15 @@ namespace boost
 
         thread::id get_id() BOOST_NOEXCEPT
         {
-        #if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
-          return detail::win32::GetCurrentThreadId();
-        #else
+#if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
+#ifdef BOOST_WINAPI_FAMILY
+            return std::this_thread::get_id().hash();
+#else
+            return detail::win32::GetCurrentThreadId();
+#endif
+#else
             return thread::id(get_or_make_current_thread_data());
-        #endif
+#endif
         }
 
 #if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
@@ -633,13 +749,21 @@ namespace boost
 
         bool interruption_requested() BOOST_NOEXCEPT
         {
+# if BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP
             return detail::get_current_thread_data() && (detail::win32::WaitForSingleObject(detail::get_current_thread_data()->interruption_handle,0)==0);
+# else
+            return detail::get_current_thread_data() && (detail::win32::WaitForSingleObjectEx(detail::get_current_thread_data()->interruption_handle,0,0)==0);
+# endif
         }
 #endif
 
         void yield() BOOST_NOEXCEPT
         {
+#ifndef BOOST_WINAPI_FAMILY
             detail::win32::Sleep(0);
+#else
+            detail::win32::WaitForSingleObjectEx(detail::win32::GetCurrentThread(),0,FALSE);
+#endif
         }
 
 #if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS

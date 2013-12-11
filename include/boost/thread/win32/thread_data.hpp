@@ -1,10 +1,14 @@
+//  (C) Copyright 2008 Anthony Williams
+//  (C) Copyright 2011-2012 Vicente J. Botet Escriba
+//  Copyright Steve Gates 2013.
+//  Copyright George Mileka 2013.
+//  Portions Copyright (c) Microsoft Open Technologies, Inc.
+//  Distributed under the Boost Software License, Version 1.0. (See
+//  accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt)
+
 #ifndef BOOST_THREAD_PTHREAD_THREAD_DATA_HPP
 #define BOOST_THREAD_PTHREAD_THREAD_DATA_HPP
-// Distributed under the Boost Software License, Version 1.0. (See
-// accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
-// (C) Copyright 2008 Anthony Williams
-// (C) Copyright 2011-2012 Vicente J. Botet Escriba
 
 #include <boost/thread/detail/config.hpp>
 #include <boost/thread/thread_time.hpp>
@@ -19,6 +23,10 @@
 #include <map>
 #include <vector>
 #include <utility>
+
+#ifdef BOOST_WINAPI_FAMILY
+#include <thread>
+#endif
 
 #include <boost/config/abi_prefix.hpp>
 
@@ -93,10 +101,17 @@ namespace boost
         struct BOOST_THREAD_DECL thread_data_base
         {
             long count;
+            
+            // Win32 threading APIs are not available in store apps so
+            // use std::thread instead as the underlying implementation.
+#ifdef BOOST_WINAPI_FAMILY
+            std::thread thread_handle;
+#else
             detail::win32::handle_manager thread_handle;
+            unsigned id;
+#endif
             boost::detail::thread_exit_callback_node* thread_exit_callbacks;
             std::map<void const*,boost::detail::tss_data_node> tss_data;
-            unsigned id;
             typedef std::vector<std::pair<condition_variable*, mutex*>
             //, hidden_allocator<std::pair<condition_variable*, mutex*> >
             > notify_list_t;
@@ -113,9 +128,15 @@ namespace boost
 //#endif
 
             thread_data_base():
-                count(0),thread_handle(detail::win32::invalid_handle_value),
-                thread_exit_callbacks(0),tss_data(),
+                count(0),
+#ifdef BOOST_WINAPI_FAMILY
+                thread_handle(),
+#else
+                thread_handle(detail::win32::invalid_handle_value),
                 id(0),
+#endif
+                thread_exit_callbacks(0),
+                tss_data(),
                 notify(),
                 async_states_()
 //#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS

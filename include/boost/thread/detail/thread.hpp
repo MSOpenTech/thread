@@ -1,10 +1,13 @@
+//  (C) Copyright 2007-2010 Anthony Williams
+//  (C) Copyright 20011-2012 Vicente J. Botet Escriba
+//  Copyright Steve Gates 2013.
+//  Copyright George Mileka 2013.
+//  Portions Copyright (c) Microsoft Open Technologies, Inc.
+//  Distributed under the Boost Software License, Version 1.0. (See
+//  accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt)
 #ifndef BOOST_THREAD_THREAD_COMMON_HPP
 #define BOOST_THREAD_THREAD_COMMON_HPP
-// Distributed under the Boost Software License, Version 1.0. (See
-// accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
-// (C) Copyright 2007-2010 Anthony Williams
-// (C) Copyright 2011-2012 Vicente J. Botet Escriba
 
 #include <boost/thread/detail/config.hpp>
 
@@ -173,7 +176,9 @@ namespace boost
 
     private:
         bool start_thread_noexcept();
+#ifndef BOOST_WINAPI_FAMILY
         bool start_thread_noexcept(const attributes& attr);
+#endif
     public:
         void start_thread()
         {
@@ -182,6 +187,7 @@ namespace boost
             boost::throw_exception(thread_resource_error());
           }
         }
+#ifndef BOOST_WINAPI_FAMILY
         void start_thread(const attributes& attr)
         {
           if (!start_thread_noexcept(attr))
@@ -189,6 +195,7 @@ namespace boost
             boost::throw_exception(thread_resource_error());
           }
         }
+#endif
 
         explicit thread(detail::thread_data_ptr data);
 

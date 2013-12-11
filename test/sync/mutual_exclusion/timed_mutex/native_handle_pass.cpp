@@ -7,8 +7,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-// Copyright (C) 2011 Vicente J. Botet Escriba
-//
+//  Copyright (C) 2011 Vicente J. Botet Escriba
+//  Copyright Steve Gates 2013.
+//  Portions Copyright (c) Microsoft Open Technologies, Inc.
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -29,8 +30,6 @@ int main()
   boost::timed_mutex m;
   boost::timed_mutex::native_handle_type h = m.native_handle();
   BOOST_TEST(h);
-#else
-#error "Test not applicable: BOOST_THREAD_DEFINES_TIMED_MUTEX_NATIVE_HANDLE not defined for this platform as not supported"
 #endif
   return boost::report_errors();
 }

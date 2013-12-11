@@ -1,5 +1,6 @@
-// Copyright (C) 2008 Vicente J. Botet Escriba
-//
+//  Copyright (C) 2008 Vicente J. Botet Escriba
+//  Copyright Steve Gates 2013.
+//  Portions Copyright (c) Microsoft Open Technologies, Inc.
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -60,6 +61,9 @@ void test_stack_size()
   BOOST_CHECK(attrs.get_stack_size() >= 0x4000);
 
 }
+
+// On Windows store thread creation with stack size not supported.
+#ifndef BOOST_WINAPI_FAMILY
 void do_test_creation_with_attrs()
 {
   test_value = 0;
@@ -74,6 +78,7 @@ void test_creation_with_attrs()
 {
   timed_test(&do_test_creation_with_attrs, 1);
 }
+#endif
 
 boost::unit_test_framework::test_suite* init_unit_test_suite(int, char*[])
 {
@@ -81,9 +86,10 @@ boost::unit_test_framework::test_suite* init_unit_test_suite(int, char*[])
 
   test->add(BOOST_TEST_CASE(test_native_handle));
   test->add(BOOST_TEST_CASE(test_stack_size));
+
+#ifndef BOOST_WINAPI_FAMILY
   test->add(BOOST_TEST_CASE(test_creation_with_attrs));
+#endif
 
   return test;
 }
-
-

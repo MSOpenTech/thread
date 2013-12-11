@@ -120,6 +120,8 @@ project boost/thread
 
 
     # : default-build <threading>multi
+    : default-build  
+        [ supported-windows-api ]  
     : usage-requirements  # pass these requirement to dependents (i.e. users)
       #<link>static:<define>BOOST_THREAD_STATIC_LINK=1
       #<link>shared:<define>BOOST_THREAD_DYN_LINK=1
@@ -308,3 +310,6 @@ lib boost_thread
       <link>static:<define>BOOST_THREAD_USE_LIB=1
       <conditional>@usage-requirements
     ;
+
+boost-install boost_thread ;
+    
