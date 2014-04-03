@@ -2,6 +2,7 @@
 //  (C) Copyright 20011-2012 Vicente J. Botet Escriba
 //  Copyright Steve Gates 2013.
 //  Copyright George Mileka 2013.
+//  Copyright Patrick Brenner 2014.
 //  Portions Copyright (c) Microsoft Open Technologies, Inc.
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -835,7 +836,7 @@ namespace boost
 
         void BOOST_THREAD_DECL add_thread_exit_function(thread_exit_function_base*);
         struct shared_state_base;
-#if defined(BOOST_THREAD_PLATFORM_WIN32)
+#if defined(BOOST_THREAD_PLATFORM_WIN32) && (!defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP)
         inline void make_ready_at_thread_exit(shared_ptr<shared_state_base> as)
         {
           detail::thread_data_base* const current_thread_data(detail::get_current_thread_data());

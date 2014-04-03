@@ -3,6 +3,7 @@
 //  (C) Copyright 2011-2012 Vicente J. Botet Escriba
 //  Copyright Steve Gates 2013.
 //  Copyright George Mileka 2013.
+//  Copyright Patrick Brenner 2014.
 //  Portions Copyright (c) Microsoft Open Technologies, Inc.
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -49,6 +50,7 @@ namespace boost
     }
   }
 
+#if !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
     namespace
     {
 #ifdef BOOST_THREAD_PROVIDES_ONCE_CXX11
@@ -120,8 +122,8 @@ namespace boost
             }
 #endif
         }
-
     }
+
     namespace detail
     {
       thread_data_base* get_current_thread_data()
@@ -141,6 +143,8 @@ namespace boost
 #endif
       }
     }
+#endif // !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
+
     namespace
     {
 #ifndef BOOST_HAS_THREADEX
@@ -201,6 +205,7 @@ namespace boost
     {
         void run_thread_exit_callbacks()
         {
+#if !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
             detail::thread_data_ptr current_thread_data(detail::get_current_thread_data(),false);
             if(current_thread_data)
             {
@@ -231,15 +236,17 @@ namespace boost
                         current_thread_data->tss_data.erase(current);
                     }
                 }
-
                 set_current_thread_data(0);
             }
+#endif
         }
 
         unsigned __stdcall thread_start_function(void* param)
         {
             detail::thread_data_base* const thread_info(reinterpret_cast<detail::thread_data_base*>(param));
+#if !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
             set_current_thread_data(thread_info);
+#endif
 #if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             BOOST_TRY
             {
@@ -347,6 +354,7 @@ namespace boost
             void operator=(externally_launched_thread&);
         };
 
+#if !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
         void make_external_thread_data()
         {
             externally_launched_thread* me=detail::heap_new<externally_launched_thread>();
@@ -372,7 +380,7 @@ namespace boost
             }
             return current_thread_data;
         }
-
+#endif
     }
 
     thread::id thread::get_id() const BOOST_NOEXCEPT
@@ -616,7 +624,7 @@ namespace boost
             detail::win32::handle handles[3]={0};
             unsigned handle_count=0;
             unsigned wait_handle_index=~0U;
-#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS && (!defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP)
             unsigned interruption_index=~0U;
 #endif
             unsigned timeout_index=~0U;
@@ -625,7 +633,7 @@ namespace boost
                 wait_handle_index=handle_count;
                 handles[handle_count++]=handle_to_wait_for;
             }
-#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS && (!defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP)
             if(detail::get_current_thread_data() && detail::get_current_thread_data()->interruption_enabled)
             {
                 interruption_index=handle_count;
@@ -689,7 +697,7 @@ namespace boost
                         {
                             return true;
                         }
-#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS && (!defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP)
                         else if(notified_index==interruption_index)
                         {
                             detail::win32::ResetEvent(detail::get_current_thread_data()->interruption_handle);
@@ -732,7 +740,7 @@ namespace boost
 #endif
         }
 
-#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS && (!defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP)
         void interruption_point()
         {
             if(interruption_enabled() && interruption_requested())
@@ -766,7 +774,7 @@ namespace boost
 #endif
         }
 
-#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS && (!defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP)
         disable_interruption::disable_interruption() BOOST_NOEXCEPT:
             interruption_was_enabled(interruption_enabled())
         {
@@ -802,6 +810,7 @@ namespace boost
 #endif
     }
 
+#if !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
     namespace detail
     {
         void add_thread_exit_function(thread_exit_function_base* func)
@@ -877,6 +886,8 @@ namespace boost
             }
         }
     }
+#endif // !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
+
     BOOST_THREAD_DECL void __cdecl on_process_enter()
     {}
 
@@ -885,7 +896,9 @@ namespace boost
 
     BOOST_THREAD_DECL void __cdecl on_process_exit()
     {
+#if !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
         boost::cleanup_tls_key();
+#endif
     }
 
     BOOST_THREAD_DECL void __cdecl on_thread_exit()
@@ -893,6 +906,7 @@ namespace boost
         boost::run_thread_exit_callbacks();
     }
 
+#if !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
     BOOST_THREAD_DECL void notify_all_at_thread_exit(condition_variable& cond, unique_lock<mutex> lk)
     {
       detail::thread_data_base* const current_thread_data(detail::get_current_thread_data());
@@ -901,6 +915,7 @@ namespace boost
         current_thread_data->notify_all_at_thread_exit(&cond, lk.release());
       }
     }
+#endif
 //namespace detail {
 //
 //    void BOOST_THREAD_DECL make_ready_at_thread_exit(shared_ptr<shared_state_base> as)

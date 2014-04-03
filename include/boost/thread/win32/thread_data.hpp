@@ -2,6 +2,7 @@
 //  (C) Copyright 2011-2012 Vicente J. Botet Escriba
 //  Copyright Steve Gates 2013.
 //  Copyright George Mileka 2013.
+//  Copyright Patrick Brenner 2014.
 //  Portions Copyright (c) Microsoft Open Technologies, Inc.
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -180,7 +181,10 @@ namespace boost
             }
 
         };
+
+#if !defined(BOOST_WINAPI_FAMILY) || BOOST_WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
         BOOST_THREAD_DECL thread_data_base* get_current_thread_data();
+#endif
 
         typedef boost::intrusive_ptr<detail::thread_data_base> thread_data_ptr;
 
