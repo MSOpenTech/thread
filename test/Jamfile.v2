@@ -732,53 +732,53 @@ rule thread-compile ( sources : reqs * : name )
     #explicit ts_shared_upwards ;
     test-suite ts_shared_upwards
     :
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_shared_lock_try_pass.cpp : uq_lock_cons_mv_ctor_sh_lock_try_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_shared_lock_for_pass.cpp : uq_lock_cons_mv_ctor_sh_lock_for_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_shared_lock_until_pass.cpp : uq_lock_cons_mv_ctor_sh_lock_until_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_shared_lock_try_pass.cpp : uq_lock_cons_mv_ctor_sh_lk_try_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_shared_lock_for_pass.cpp : uq_lock_cons_mv_ctor_sh_lk_for_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/unique_lock/cons/move_ctor_shared_lock_until_pass.cpp : uq_lock_cons_mv_ctor_sh_lk_utl_p ]
 
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_try_pass.cpp : upg_lock_cons_move_ctor_sh_lock_try_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_for_pass.cpp : upg_lock_cons_move_ctor_sh_lock_for_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_until_pass.cpp : upg_lock_cons_move_ctor_sh_lock_untl_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_try_pass.cpp : upg_lock_cons_mv_ctor_sh_lk_try_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_for_pass.cpp : upg_lock_cons_mv_ctor_sh_lk_for_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/upgrade_lock/cons/move_ctor_shared_lock_until_pass.cpp : upg_lock_cons_mv_ctor_sh_lk_utl_p ]
     ;
 
 
     #explicit ts_shared_lock_guard ;
     test-suite ts_shared_lock_guard
     :
-          [ thread-compile-fail ./sync/mutual_exclusion/locks/shared_lock_guard/copy_assign_fail.cpp : : shared_lock_guard__cons__copy_assign_f ]
-          [ thread-compile-fail ./sync/mutual_exclusion/locks/shared_lock_guard/copy_ctor_fail.cpp : : shared_lock_guard__cons__copy_ctor_f ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/shared_lock_guard/adopt_lock_pass.cpp : shared_lock_guard__cons__adopt_lock_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/shared_lock_guard/default_pass.cpp : shared_lock_guard__cons__default_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/shared_lock_guard/types_pass.cpp : shared_lock_guard__types_p ]
+          [ thread-compile-fail ./sync/mutual_exclusion/locks/shared_lock_guard/copy_assign_fail.cpp : : shr_lock_guard_cons_copy_assign_f ]
+          [ thread-compile-fail ./sync/mutual_exclusion/locks/shared_lock_guard/copy_ctor_fail.cpp : : shr_lock_guard_cons_copy_ctor_f ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/shared_lock_guard/adopt_lock_pass.cpp : shr_lock_guard_cons_adopt_lock_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/shared_lock_guard/default_pass.cpp : shr_lock_guard_cons_default_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/shared_lock_guard/types_pass.cpp : shr_lock_guard_types_p ]
     ;
 
     #explicit ts_reverse_lock ;
     test-suite ts_reverse_lock
     :
-          [ thread-compile-fail ./sync/mutual_exclusion/locks/reverse_lock/copy_assign_fail.cpp : : reverse_lock__copy_assign_f ]
-          [ thread-compile-fail ./sync/mutual_exclusion/locks/reverse_lock/copy_ctor_fail.cpp : : reverse_lock__copy_ctor_f ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/reverse_lock/unique_lock_ctor_pass.cpp : reverse_lock__unique_lock_ctor_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/locks/reverse_lock/types_pass.cpp : reverse_lock__types_p ]
+          [ thread-compile-fail ./sync/mutual_exclusion/locks/reverse_lock/copy_assign_fail.cpp : : reverse_lock_copy_assign_f ]
+          [ thread-compile-fail ./sync/mutual_exclusion/locks/reverse_lock/copy_ctor_fail.cpp : : reverse_lock_copy_ctor_f ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/reverse_lock/unique_lock_ctor_pass.cpp : reverse_lock_uniq_lock_ctor_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/locks/reverse_lock/types_pass.cpp : reverse_lock_types_p ]
     ;
 
 
     #explicit ts_synchronized_value ;
     test-suite ts_synchronized_value
     :
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/copy_assign_pass.cpp : synchronized_value__copy_assign_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/copy_ctor_pass.cpp : synchronized_value__copy_ctor_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/copy_T_assign_pass.cpp : synchronized_value__copy_T_assign_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/copy_T_ctor_pass.cpp : synchronized_value__copy_T_ctor_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/default_ctor_pass.cpp : synchronized_value__default_ctor_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/indirect_pass.cpp : synchronized_value__indirect_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/move_assign_pass.cpp : synchronized_value__move_assign_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/move_ctor_pass.cpp : synchronized_value__move_ctor_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/move_T_assign_pass.cpp : synchronized_value__move_T_assign_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/move_T_ctor_pass.cpp : synchronized_value__move_T_ctor_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/swap_pass.cpp : synchronized_value__swap_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/swap_T_pass.cpp : synchronized_value__swap_T_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/synchronize_pass.cpp : synchronized_value__synchronize_p ]
-          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/call_pass.cpp : synchronized_value__call_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/copy_assign_pass.cpp : synched_value_copy_assign_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/copy_ctor_pass.cpp : synched_value_copy_ctor_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/copy_T_assign_pass.cpp : synched_value_copy_T_assign_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/copy_T_ctor_pass.cpp : synched_value_copy_T_ctor_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/default_ctor_pass.cpp : synched_value_default_ctor_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/indirect_pass.cpp : synched_value_indirect_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/move_assign_pass.cpp : synched_value_move_assign_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/move_ctor_pass.cpp : synched_value_move_ctor_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/move_T_assign_pass.cpp : synched_value_move_T_assign_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/move_T_ctor_pass.cpp : synched_value_move_T_ctor_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/swap_pass.cpp : synched_value_swap_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/swap_T_pass.cpp : synched_value_swap_T_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/synchronize_pass.cpp : synched_value_synchronize_p ]
+          [ thread-run2-noit ./sync/mutual_exclusion/synchronized_value/call_pass.cpp : synched_value_call_p ]
 
     ;
 

@@ -14,7 +14,7 @@
 #include <string>
 #include <iostream>
 
-#if defined BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
+#if defined BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION && !defined BOOST_WINAPI_FAMILY
 
 int p1_ex()
 {

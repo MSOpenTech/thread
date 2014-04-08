@@ -150,6 +150,7 @@ boost::csbl::unique_ptr<int> f4(
 
 int main()
 {
+#ifndef BOOST_WINAPI_FAMILY
   std::cout << __FILE__ << "[" << __LINE__ << "]" << std::endl;
   {
     try
@@ -723,4 +724,7 @@ int main()
   }
 #endif
   return boost::report_errors();
+#else  // BOOST_WINAPI_FAMILY
+  return 0;
+#endif // BOOST_WINAPI_FAMILY
 }
