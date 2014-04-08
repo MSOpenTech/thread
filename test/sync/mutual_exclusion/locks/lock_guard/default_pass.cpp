@@ -60,6 +60,7 @@ void f()
 
 int main()
 {
+#ifndef BOOST_WINAPI_FAMILY
   m.lock();
   boost::thread t(f);
 #ifdef BOOST_THREAD_USES_CHRONO
@@ -69,4 +70,7 @@ int main()
   t.join();
 
   return boost::report_errors();
+#else
+  return 0;
+#endif
 }
