@@ -61,7 +61,7 @@ namespace boost
 #ifndef BOOST_WINAPI_FAMILY
         DWORD current_thread_tls_key=TLS_OUT_OF_INDEXES;
 #else
-        DWORD current_thread_tls_key=FLS_OUT_OF_INDEXES;
+        __declspec(thread) boost::detail::thread_data_base* current_thread_data_base;
 #endif
 
         void create_current_thread_tls_key()
@@ -71,8 +71,7 @@ namespace boost
             current_thread_tls_key=TlsAlloc();
             BOOST_ASSERT(current_thread_tls_key!=TLS_OUT_OF_INDEXES);
 #else
-            current_thread_tls_key=FlsAlloc(0);
-            BOOST_ASSERT(current_thread_tls_key!=FLS_OUT_OF_INDEXES);
+            // do nothing
 #endif
         }
 
@@ -85,11 +84,7 @@ namespace boost
                 current_thread_tls_key=TLS_OUT_OF_INDEXES;
             }
 #else
-            if(current_thread_tls_key!=FLS_OUT_OF_INDEXES)
-            {
-                FlsFree(current_thread_tls_key);
-                current_thread_tls_key=FLS_OUT_OF_INDEXES;
-            }
+            // do nothing
 #endif
         }
 
@@ -107,15 +102,7 @@ namespace boost
                 //boost::throw_exception(thread_resource_error());
             }
 #else
-            if (current_thread_tls_key!=FLS_OUT_OF_INDEXES)
-            {
-                BOOST_VERIFY(FlsSetValue(current_thread_tls_key,new_data));
-            }
-            else
-            {
-                BOOST_VERIFY(false);
-                //boost::throw_exception(thread_resource_error());
-            }
+            current_thread_data_base = new_data;
 #endif
         }
 
@@ -131,11 +118,7 @@ namespace boost
           }
           return (detail::thread_data_base*)TlsGetValue(current_thread_tls_key);
 #else
-          if(current_thread_tls_key==FLS_OUT_OF_INDEXES)
-          {
-              return 0;
-          }
-          return (detail::thread_data_base*)FlsGetValue(current_thread_tls_key);
+          return current_thread_data_base;
 #endif
       }
     }
