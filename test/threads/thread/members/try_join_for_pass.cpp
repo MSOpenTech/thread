@@ -91,14 +91,11 @@ int main()
     BOOST_TEST(t0.try_join_for(boost::chrono::milliseconds(150)));
     BOOST_TEST(!t0.joinable());
   }
-
-#ifndef BOOST_WINAPI_FAMILY
   {
     boost::thread t0( (th_100_ms));
     BOOST_TEST(!t0.try_join_for(boost::chrono::milliseconds(50)));
     t0.join();
   }
-#endif
 
   {
     boost::unique_lock<boost::mutex> lk(resource_deadlock_would_occur_mtx);

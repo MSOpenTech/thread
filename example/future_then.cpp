@@ -11,7 +11,7 @@
 #include <boost/thread/future.hpp>
 #include <boost/assert.hpp>
 #include <string>
-#if defined BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION && !defined BOOST_WINAPI_FAMILY
+#if defined BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
 
 int p1()
 {
