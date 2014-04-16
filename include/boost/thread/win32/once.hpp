@@ -6,9 +6,7 @@
 //  (C) Copyright 2005-7 Anthony Williams
 //  (C) Copyright 2005 John Maddock
 //  (C) Copyright 2011-2013 Vicente J. Botet Escriba
-//  Copyright Steve Gates 2013.
-//  Copyright George Mileka 2013.
-//  Portions Copyright (c) Microsoft Open Technologies, Inc.
+//  Copyright (c) Microsoft Corporation
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
